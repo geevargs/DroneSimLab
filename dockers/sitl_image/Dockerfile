@@ -1,9 +1,10 @@
 # Base docker image
-FROM ubuntu:14.04
+FROM ubuntu:16.04 
 RUN pwd
 RUN apt-get -y update 
-#RUN apt-get -y install build-essential
+RUN apt-get -y install build-essential
 RUN apt-get -y install python-pip
+RUN apt-get -y install software-properties-common python-software-properties
 RUN apt-get -y install ccache gawk git python-pexpect python-lxml
 RUN apt-get -y install python-dev
 RUN pip install future pymavlink MAVProxy
@@ -21,22 +22,26 @@ RUN cd /tmp/tmux && sh ./autogen.sh && ./configure && make install
 
 #python3
 RUN apt-get -y install curl
-RUN curl -o /miniconda.sh https://repo.continuum.io/miniconda/Miniconda3-4.2.12-Linux-x86_64.sh
+RUN apt-get -y install libpangocairo-1.0-0
+RUN curl -o /miniconda.sh https://repo.continuum.io/miniconda/Miniconda3-4.3.27.1-Linux-x86_64.sh
 RUN /bin/bash /miniconda.sh -b -p /miniconda
 RUN PATH=/miniconda/bin conda install -y pyzmq
 RUN PATH=/miniconda/bin conda install -c menpo opencv3=3.2.0
 RUN PATH=/miniconda/bin:$PATH pip install pymavlink
 RUN apt-get -y install libgtk2.0-dev
 
+
 #https://coderwall.com/p/4b0d0a/how-to-copy-and-paste-with-tmux-on-ubuntu
 RUN apt-get -y install xclip
-
 ### normal user settings
 ARG UID
 RUN useradd -u $UID docker
 RUN echo "docker:docker" | chpasswd
 RUN echo "root:root" | chpasswd
 RUN echo "docker ALL=(ALL:ALL) NOPASSWD:ALL" >> /etc/sudoers
+ARG GDRIVER
+RUN GDRIVER=$GDRIVER
+
 
 ### add this line to consume the GDRIVER since the build scripts gives the GDRIVER as an argument even
 ### if it is not needed
